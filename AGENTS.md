@@ -1,3 +1,97 @@
+# Obsidian Header Coloring Plugin — Agent Context
+
+## What this plugin does
+
+Colors markdown headers (H1–H6) in Obsidian using injected CSS. Two coloring modes:
+- **Colormap mode** (default): cycles through a generated palette (HSV, cool, warm, greyscale) across heading levels
+- **User-defined mode**: explicit font + background color per heading level (H1–H6)
+
+Colors apply in Live Preview, Source mode, and Reading view.
+
+Inspired by [vscode-markdown-header-coloring](https://github.com/satokaz/vscode-markdown-header-coloring).
+Scaffolded from [obsidian-sample-plugin](https://github.com/obsidianmd/obsidian-sample-plugin).
+
+## Architecture decision: CSS injection
+
+**Do not use CodeMirror 6 decorations.** This plugin uses CSS injection:
+- Obsidian's Live Preview already adds `.HyperMD-header-N` classes to header lines
+- Reading mode renders `<h1>`–`<h6>` elements directly
+- A `<style id="header-coloring-plugin">` element is created on `onload`, updated on settings change, and removed on `onunload`
+- CSS naturally skips headers inside fenced code blocks and YAML frontmatter — no document parsing needed
+
+Key CSS selectors:
+```css
+/* Live Preview / Source — line background */
+.cm-line.HyperMD-header-1 { background-color: ...; }
+/* Live Preview / Source — text color */
+.cm-line.HyperMD-header-1 .cm-header-1 { color: ...; }
+/* Reading view */
+.markdown-reading-view h1 { color: ...; background-color: ...; }
+```
+
+> Verify these selector names with Obsidian DevTools before finalizing. Adjust if needed.
+
+## Planned source file structure
+
+```
+src/
+  main.ts           # Plugin lifecycle only (onload, onunload, settings tab)
+  settings.ts       # HeaderColoringSettings interface, DEFAULT_SETTINGS, SettingsTab UI
+  colorEngine.ts    # HSV/colormap math, color generation functions (no external deps)
+  styleInjector.ts  # buildStylesheet(settings) → CSS string, injectStyles(el, css)
+```
+
+## Settings interface (planned)
+
+```ts
+interface HeaderColoringSettings {
+  mode: "colormap" | "userDefined";
+  colormapName: "hsv" | "cool" | "warm" | "greyscale";
+  nshades: number;                  // 10–40, default 20
+  fontColorOpacity: number;         // 0.0–1.0, default 1.0
+  backgroundColorOpacity: number;   // 0.0–1.0, default 0.1
+  enableEditorMode: boolean;
+  enableReadingMode: boolean;
+  userDefined: {
+    [K in `h${1|2|3|4|5|6}`]: {
+      color: string;
+      backgroundColor: string;
+      bold: boolean;
+      italic: boolean;
+    };
+  };
+}
+```
+
+## Key constraints
+
+- **No external npm dependencies for color generation** — implement HSV colormap as ~10 lines of math
+- Keep `main.ts` under ~60 lines; all logic in the four modules above
+- No network requests, no vault access, fully offline
+- Must clean up the injected `<style>` element on plugin unload (no leaked DOM)
+- See [TODO.md](TODO.md) for the full development checklist
+
+## Obsidian developer policy compliance
+
+This plugin targets the [Obsidian community directory](https://community.obsidian.md/). All policies at https://docs.obsidian.md/Developer+policies must be respected.
+
+**Hard rules (never violate):**
+- No code obfuscation — code must be readable and auditable
+- No dynamic ads loaded from the network
+- No client-side telemetry of any kind
+- No self-update mechanism (Obsidian handles updates via the directory)
+
+**This plugin's compliance status:**
+- ✅ Fully offline — no network requests
+- ✅ No telemetry
+- ✅ No ads
+- ✅ Open source (GPL-3.0-only) with LICENSE file
+- ✅ No auto-update logic
+
+**Trademark:** The word "Obsidian" in the plugin name is acceptable for community plugins (it aids discoverability) as long as it's clear this is a community plugin, not a first-party Obsidian creation. Do not use the Obsidian logo or imply official affiliation.
+
+---
+
 # Obsidian community plugin
 
 ## Project overview
