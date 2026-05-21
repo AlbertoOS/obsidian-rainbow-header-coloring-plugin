@@ -135,6 +135,11 @@ interface HeaderColoringSettings {
 
 - [ ] Build: `npm run build` — must succeed with zero errors
 - [ ] Lint: `npm run lint` — must pass
+- [ ] **Set up a dedicated test vault** to test the plugin locally:
+  - Create a new Obsidian vault (e.g. `~/obsidian-vaults/header-coloring-test/`)
+  - Add example notes with all heading levels H1–H6, nested headings, fenced code blocks with `#` lines, and YAML front matter
+  - Symlink or copy `main.js`, `manifest.json`, `styles.css` to `.obsidian/plugins/markdown-header-coloring/`
+  - Enable via **Settings → Community plugins → Enable markdown-header-coloring**
 - [ ] **Manual test checklist**:
   - [ ] Headers H1–H6 are colored in Live Preview
   - [ ] Headers H1–H6 are colored in Reading mode
@@ -147,23 +152,52 @@ interface HeaderColoringSettings {
   - [ ] Works in light theme and dark theme
   - [ ] User-defined mode: per-level colors apply correctly
   - [ ] Colormap mode: colors cycle correctly across multiple headings
+- [ ] **Beta testing via BRAT** (optional, before public submission):
+  - Testers install the [BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin
+  - They add your GitHub repo URL in BRAT → **Add Beta Plugin**
+  - No public release required — useful for community feedback before submission
 
 ---
 
 ## Phase 8 · Release Prep
 
+- [ ] **GitHub repo settings**: go to **Settings → Actions → General → Workflow permissions**, select **Read and write permissions**, save. Required for the release workflow to create GitHub releases.
 - [ ] Final README with at least one screenshot or description of visual result
+- [ ] Ensure `manifest.json` passes all submission requirements:
+  - `id` does not contain "obsidian" — currently `"markdown-header-coloring"` ✅
+  - `description` ≤250 chars, ends with period, no emoji/special chars, sentence case ✅
+  - `fundingUrl` absent (not accepting donations) ✅
+  - `isDesktopOnly: false` (no Node/Electron APIs used) ✅
+  - `minAppVersion` set appropriately ✅
 - [ ] Bump version: `npm run version` (updates `manifest.json` and `versions.json`)
 - [ ] Production build: `npm run build`
-- [ ] Create GitHub release tagged with the version number (no `v` prefix per `.npmrc`)
-  - Attach: `main.js`, `manifest.json`, `styles.css`
-- [ ] Submit to Obsidian community directory at https://community.obsidian.md/ via PR to obsidian-releases
+- [ ] **Create GitHub release** (via GitHub Actions — automated):
+  - Create an annotated tag matching the version in `manifest.json`:
+    ```bash
+    git tag -a 1.0.0 -m "1.0.0"
+    git push origin 1.0.0
+    ```
+  - The `.github/workflows/release.yml` workflow triggers automatically
+  - It builds the plugin and creates a **draft** GitHub release with `main.js`, `manifest.json`, `styles.css` attached
+  - Go to **Releases** on GitHub, edit the draft, add release notes, and **Publish**
+- [ ] **Submit to Obsidian community directory**:
+  1. Go to [community.obsidian.md](https://community.obsidian.md) and sign in with your Obsidian account
+  2. Link your GitHub account to your profile
+  3. Select **Plugins → New plugin**
+  4. Enter the GitHub repository URL
+  5. Review and agree to the Developer policies
+  6. Select **Submit**
+  - The automated review checks `manifest.json` at HEAD — make sure it's committed and accurate
+  - The `id` must be unique across all published plugins
+  - Address any automated review feedback by publishing a new release with an incremented version
 
 ---
 
 ## Obsidian Developer Policy Compliance
 
-Reference: https://docs.obsidian.md/Developer+policies
+Reference: https://docs.obsidian.md/Developer+policies  
+Submission requirements: https://docs.obsidian.md/Plugins/Releasing/Submission+requirements+for+plugins  
+Plugin guidelines: https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines
 
 | Rule | Status | Notes |
 |---|---|---|
@@ -175,6 +209,16 @@ Reference: https://docs.obsidian.md/Developer+policies
 | Attribution in README | ✅ | obsidian-sample-plugin + vscode-markdown-header-coloring credited |
 | Trademark compliance | ✅ | "Obsidian" in name is acceptable for community plugins |
 | No network use | ✅ | Nothing to disclose |
+| Plugin `id` doesn't contain "obsidian" | ✅ | id is `"markdown-header-coloring"` |
+| Plugin ID not in command IDs | ✅ | Obsidian auto-prefixes; register commands without the prefix |
+| `fundingUrl` absent | ✅ | Not accepting donations |
+| `isDesktopOnly: false` | ✅ | No Node.js / Electron APIs used; CSS injection works on mobile |
+| Description ≤250 chars, ends with period, no emoji | ✅ | Currently 105 chars |
+| No `innerHTML`/`outerHTML`/`insertAdjacentHTML` | ✅ | Using `createEl()`, DOM API only |
+| Use `this.app` not global `app` | ✅ | Enforced throughout |
+| Settings headings via `setHeading()` | ✅ | Not using `<h2>` tags |
+| No hardcoded inline styles | ✅ | Plugin uses CSS injection via `<style>` tag (intentional for this plugin's function) |
+| All sample code removed | ⏳ | Will be removed when implementing Phase 3–6 |
 
 ---
 

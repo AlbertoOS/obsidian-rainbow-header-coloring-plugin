@@ -1,9 +1,9 @@
 {
-	"id": "obsidian-header-coloring",
+	"id": "markdown-header-coloring",
 	"name": "Header Coloring",
 	"version": "1.0.0",
 	"minAppVersion": "1.0.0",
-	"description": "Color your markdown headers (H1–H6) with customizable palettes. Supports colormap and user-defined modes.",
+	"description": "Color markdown headers (H1-H6) with customizable palettes. Supports colormap cycling and per-level user-defined colors.",
 	"author": "Alberto Oliveira",
 	"authorUrl": "https://github.com/AlbertoOS",
 	"isDesktopOnly": false

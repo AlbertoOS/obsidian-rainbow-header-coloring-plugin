@@ -71,6 +71,31 @@ interface HeaderColoringSettings {
 - Must clean up the injected `<style>` element on plugin unload (no leaked DOM)
 - See [TODO.md](TODO.md) for the full development checklist
 
+## Submission requirements (critical — enforced during community review)
+
+These are checked by automated review at https://community.obsidian.md:
+
+- **Plugin `id` must NOT contain the word "obsidian"** — current id is `"markdown-header-coloring"` ✅
+- **Don't include plugin ID in command IDs** — Obsidian auto-prefixes all command IDs with `pluginId:`, so a command registered as `"reload-styles"` becomes `"markdown-header-coloring:reload-styles"` automatically. Never manually add the prefix.
+- **Description rules**: ≤250 chars, ends with a period, no emoji, no special chars, sentence case, starts with an action verb. E.g. "Color markdown headers (H1-H6) with customizable palettes."
+- **`fundingUrl`**: only include if you actually accept donations — otherwise omit entirely
+- **`isDesktopOnly`**: must be `true` if any Node.js / Electron API is used (we use neither — leave `false`)
+- **Remove all sample code** before submission — no `MyPlugin`, `SampleSettingTab`, etc.
+
+## Coding guidelines from Obsidian plugin review
+
+Key rules from https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines:
+
+- **Use `this.app` not global `app`** — the global is for debugging only and may be removed
+- **No `innerHTML` / `outerHTML` / `insertAdjacentHTML`** — use `createEl()`, `createDiv()`, `el.empty()`
+- **Settings tab headings**: use `new Setting(containerEl).setName('...').setHeading()` — not `<h2>` tags
+- **Settings heading copy**: sentence case, no "settings" word in section headings, no top-level heading if only one section
+- **No hardcoded styles in JS** — use CSS classes + CSS variables (`var(--text-normal)`, etc.) instead of `el.style.color = '...'`
+- **No default hotkeys for commands** — conflicts with user configuration
+- **Use `const`/`let`, never `var`**
+- **`async`/`await` over Promises**
+- **Clean up all resources in `onunload`** — use `registerEvent()`, `registerDomEvent()`, `registerInterval()` where possible
+
 ## Obsidian developer policy compliance
 
 This plugin targets the [Obsidian community directory](https://community.obsidian.md/). All policies at https://docs.obsidian.md/Developer+policies must be respected.
