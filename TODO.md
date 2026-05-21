@@ -110,13 +110,12 @@ interface HeaderColoringSettings {
 
 ## Phase 7 · QA & Testing
 
-- [ ] Build: `npm run build` — must succeed with zero errors
-- [ ] Lint: `npm run lint` — must pass
-- [ ] **Set up a dedicated test vault** to test the plugin locally:
-  - Create a new Obsidian vault (e.g. `~/obsidian-vaults/header-coloring-test/`)
-  - Add example notes with all heading levels H1–H6, nested headings, fenced code blocks with `#` lines, and YAML front matter
-  - Symlink or copy `main.js`, `manifest.json`, `styles.css` to `.obsidian/plugins/rainbow-header-coloring/`
-  - Enable via **Settings → Community plugins → Enable rainbow-header-coloring**
+- [x] Build: `npm run build` — must succeed with zero errors
+- [x] Lint: `npm run lint` — must pass
+- [x] **Test vault in repo** (`test-plugin-vault/`):
+  - 9 markdown files covering all edge cases (happy path, code blocks, YAML frontmatter, blockquotes, inline formatting, real-world structure, callouts, consecutive same-level, edge cases)
+  - Run `npm run install-test` to build and copy artifacts into the vault
+  - Open `test-plugin-vault/` in Obsidian and enable **Rainbow Header Coloring**
 - [ ] **Manual test checklist**:
   - [ ] Headers H1–H6 are colored in Live Preview
   - [ ] Headers H1–H6 are colored in Reading mode
@@ -195,7 +194,7 @@ Plugin guidelines: https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines
 | Use `this.app` not global `app` | ✅ | Enforced throughout |
 | Settings headings via `setHeading()` | ✅ | Not using `<h2>` tags |
 | No hardcoded inline styles | ✅ | Plugin uses CSS injection via `<style>` tag (intentional for this plugin's function) |
-| All sample code removed | ⏳ | Will be removed when implementing Phase 3–6 |
+| All sample code removed | ✅ | No `MyPlugin`, `SampleSettingTab`, or sample boilerplate remains |
 
 ---
 
