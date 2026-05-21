@@ -1,23 +1,23 @@
-# TODO — Obsidian Header Coloring Plugin
+# TODO — Obsidian Rainbow Header Coloring Plugin
 
-**Status:** Pre-development (unmodified Obsidian sample plugin template)
+**Status:** Core implementation complete — ready for QA (Phase 7)
 
 Inspired by [vscode-markdown-header-coloring](https://github.com/satokaz/vscode-markdown-header-coloring) by satokaz.
 Scaffolded from the [obsidian-sample-plugin](https://github.com/obsidianmd/obsidian-sample-plugin) template.
 
 ---
 
-## Phase 1 · Project Metadata & Cleanup
+## Phase 1 · Project Metadata & Cleanup ✅
 
-- [ ] **Update `manifest.json`** — set `id`, `name`, `description`, `author`, `authorUrl`, `minAppVersion`
-- [ ] **Update `package.json`** — set `name`, `description`, `author`, `repository` URL
-- [ ] **Rewrite `README.md`** — purpose, features overview, installation steps, settings reference, credits (template + vscode extension inspiration)
-- [ ] **Remove sample plugin boilerplate** from `src/main.ts` (ribbon icon, dice command, sample modal, setInterval, click listener)
-- [ ] **Clear `src/settings.ts`** — remove `mySetting: string` placeholder; keep structure for real settings
+- [x] **Update `manifest.json`** — set `id`, `name`, `description`, `author`, `authorUrl`, `minAppVersion`
+- [x] **Update `package.json`** — set `name`, `description`, `author`, `repository` URL
+- [x] **Rewrite `README.md`** — purpose, features overview, installation steps, settings reference, credits
+- [x] **Remove sample plugin boilerplate** from `src/main.ts`
+- [x] **Clear `src/settings.ts`** — replaced with `HeaderColoringSettings` interface and real UI
 
 ---
 
-## Phase 2 · Architecture Decision & Settings Design
+## Phase 2 · Architecture Decision & Settings Design ✅
 
 ### Approach: CSS injection (not CodeMirror 6 decorations)
 
@@ -64,70 +64,47 @@ interface HeaderColoringSettings {
 
 ---
 
-## Phase 3 · Color Engine (`src/colorEngine.ts`)
+## Phase 3 · Color Engine (`src/colorEngine.ts`) ✅
 
-- [ ] Implement `hsvToRgba(h: number, s: number, v: number, a: number): string`
-  - Returns `"rgba(r, g, b, a)"` CSS string
-- [ ] Implement `generateColormapColors(name, nshades, fontOpacity, bgOpacity): ColorEntry[]`
-  - `ColorEntry = { font: string; background: string }` (two rgba strings per heading)
-  - Default: HSV colormap, cycling hue 0→1 over `nshades` steps at full saturation/value
-- [ ] Implement a small set of built-in colormaps as pure functions:
-  - `hsv` — full hue rotation (default, like the VSCode extension default)
-  - `cool` — cyan → magenta
-  - `warm` — yellow → red
-  - `greyscale` — white → dark grey
-  - (More can be added without breaking changes)
-- [ ] Export `COLORMAP_NAMES` constant for use in settings UI dropdown
-- [ ] **No external `colormap` npm package** — keep `main.js` small per Obsidian guidelines
+- [x] Implement `hsvToRgb` and `toRgba` helpers
+- [x] Implement `colormapColor(name, t)` for `hsv`, `cool`, `warm`, `greyscale`
+- [x] Implement `generateColormapColors(name, nshades, fontOpacity, bgOpacity): ColorEntry[]`
+- [x] Export `COLORMAP_NAMES` and `COLORMAP_LABELS` constants for settings UI
+- [x] **No external `colormap` npm package** — pure math, ~50 lines
 
 ---
 
-## Phase 4 · CSS Injector (`src/styleInjector.ts`)
+## Phase 4 · CSS Injector (`src/styleInjector.ts`) ✅
 
-- [ ] Implement `buildStylesheet(settings: HeaderColoringSettings): string`
-  - For `mode === "colormap"`: generate `nshades` colors, assign H1–H6 by cycling through them
-  - For `mode === "userDefined"`: use per-level `color` and `backgroundColor` directly
-  - Emit CSS rules for both editor selectors and reading view selectors (if enabled)
-  - Handle opacity: `fontColorOpacity` and `backgroundColorOpacity` applied to rgba alpha
-- [ ] Implement `injectStyles(el: HTMLStyleElement, css: string): void` — sets `el.textContent`
-- [ ] Plugin creates a `<style id="header-coloring-plugin">` element on load, removes on unload
+- [x] Implement `buildStylesheet(settings): string`
+  - [x] Colormap mode: spread 6 heading levels evenly across `nshades` palette
+  - [x] User-defined mode: per-level color, background, bold, italic
+  - [x] Editor selectors (`.cm-line.HyperMD-header-N`, `.cm-header-N`) and reading view (`h1`–`h6`)
+- [x] Implement `injectStyles(el, css)` — sets `el.textContent`
 
 ---
 
-## Phase 5 · Settings UI (`src/settings.ts`)
+## Phase 5 · Settings UI (`src/settings.ts`) ✅
 
-- [ ] **Mode selector**: Radio or dropdown — `Colormap` / `User defined`
-- [ ] **Colormap section** (visible only when `mode === "colormap"`):
-  - Dropdown: colormap name (`hsv`, `cool`, `warm`, `greyscale`, …)
-  - Slider: number of shades (10–40, step 1, default 20)
-  - Slider: font color opacity (0–1, step 0.05, default 1.0)
-  - Slider: background opacity (0–1, step 0.05, default 0.1)
-- [ ] **User-defined section** (visible only when `mode === "userDefined"`):
-  - For each heading level H1–H6:
-    - Text input (or color picker): font color
-    - Text input (or color picker): background color
-    - Toggle: bold
-    - Toggle: italic
-- [ ] **Scope section**:
-  - Toggle: enable in editor (Live Preview + Source)
-  - Toggle: enable in reading view
-- [ ] **Live preview**: call `rebuildStyles()` on every setting change (no save button needed)
-- [ ] **Reset to defaults** button
+- [x] `HeaderColoringSettings` interface with all fields
+- [x] `DEFAULT_SETTINGS` with sensible defaults (HSV colormap, opacity 1.0/0.1)
+- [x] `HeaderColoringSettingsTab` with:
+  - [x] Mode dropdown (colormap / user defined)
+  - [x] Scope toggles (editor / reading view)
+  - [x] Colormap section: palette dropdown, shades slider, opacity sliders
+  - [x] User-defined section: per-level color pickers, bold/italic toggles, background toggles
+  - [x] Live rebuild on every setting change (no save button)
 
 ---
 
-## Phase 6 · Main Plugin (`src/main.ts`)
+## Phase 6 · Main Plugin (`src/main.ts`) ✅
 
-- [ ] Strip all sample plugin boilerplate
-- [ ] `onload()`:
-  1. Load settings (`this.loadData()`)
-  2. Merge with `DEFAULT_SETTINGS`
-  3. Create `<style>` element, append to `document.head`
-  4. Inject initial CSS via `buildStylesheet(settings)`
-  5. Register settings tab (`this.addSettingTab(...)`)
-- [ ] `onunload()`: remove the `<style>` element (clean up DOM)
-- [ ] `rebuildStyles()` helper: call `buildStylesheet` → `injectStyles`, then `saveData`
-- [ ] Keep `main.ts` under 60 lines; all logic lives in `colorEngine.ts`, `styleInjector.ts`, `settings.ts`
+- [x] Strip all sample plugin boilerplate
+- [x] `onload()`: load settings, create `<style>` element, inject CSS, register settings tab
+- [x] `onunload()`: remove the `<style>` element (clean DOM)
+- [x] `rebuildStyles()`: `buildStylesheet` → `injectStyles` → `saveData`
+- [x] Deep-merge `loadSettings()` for nested `userDefined` object
+- [x] `main.ts` under 45 lines
 
 ---
 
@@ -138,8 +115,8 @@ interface HeaderColoringSettings {
 - [ ] **Set up a dedicated test vault** to test the plugin locally:
   - Create a new Obsidian vault (e.g. `~/obsidian-vaults/header-coloring-test/`)
   - Add example notes with all heading levels H1–H6, nested headings, fenced code blocks with `#` lines, and YAML front matter
-  - Symlink or copy `main.js`, `manifest.json`, `styles.css` to `.obsidian/plugins/markdown-header-coloring/`
-  - Enable via **Settings → Community plugins → Enable markdown-header-coloring**
+  - Symlink or copy `main.js`, `manifest.json`, `styles.css` to `.obsidian/plugins/rainbow-header-coloring/`
+  - Enable via **Settings → Community plugins → Enable rainbow-header-coloring**
 - [ ] **Manual test checklist**:
   - [ ] Headers H1–H6 are colored in Live Preview
   - [ ] Headers H1–H6 are colored in Reading mode
@@ -164,7 +141,7 @@ interface HeaderColoringSettings {
 - [ ] **GitHub repo settings**: go to **Settings → Actions → General → Workflow permissions**, select **Read and write permissions**, save. Required for the release workflow to create GitHub releases.
 - [ ] Final README with at least one screenshot or description of visual result
 - [ ] Ensure `manifest.json` passes all submission requirements:
-  - `id` does not contain "obsidian" — currently `"markdown-header-coloring"` ✅
+  - `id` does not contain "obsidian" — currently `"rainbow-header-coloring"` ✅
   - `description` ≤250 chars, ends with period, no emoji/special chars, sentence case ✅
   - `fundingUrl` absent (not accepting donations) ✅
   - `isDesktopOnly: false` (no Node/Electron APIs used) ✅
@@ -209,7 +186,7 @@ Plugin guidelines: https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines
 | Attribution in README | ✅ | obsidian-sample-plugin + vscode-markdown-header-coloring credited |
 | Trademark compliance | ✅ | "Obsidian" in name is acceptable for community plugins |
 | No network use | ✅ | Nothing to disclose |
-| Plugin `id` doesn't contain "obsidian" | ✅ | id is `"markdown-header-coloring"` |
+  | Plugin `id` doesn't contain "obsidian" | ✅ | id is `"rainbow-header-coloring"` |
 | Plugin ID not in command IDs | ✅ | Obsidian auto-prefixes; register commands without the prefix |
 | `fundingUrl` absent | ✅ | Not accepting donations |
 | `isDesktopOnly: false` | ✅ | No Node.js / Electron APIs used; CSS injection works on mobile |
