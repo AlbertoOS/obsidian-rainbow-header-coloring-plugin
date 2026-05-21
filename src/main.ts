@@ -6,13 +6,24 @@ import {
 } from "./settings";
 import { buildStylesheet, injectStyles } from "./styleInjector";
 import { cycleViewPlugin, setCyclePluginState, updateReadingViewCycles } from "./cyclePlugin";
+import {
+	OverrideConfig,
+	loadOverrides,
+	readOverridesText,
+	resolveEffectiveSettings,
+	ensureOverridesFile,
+} from "./overrideConfig";
 
 export default class RainbowHeaderColoringPlugin extends Plugin {
 	settings!: HeaderColoringSettings;
+	overrides: OverrideConfig = {};
+	overridesText = "";
 	private styleEl!: HTMLStyleElement;
 
 	async onload() {
 		await this.loadSettings();
+		await ensureOverridesFile(this.app);
+		await this.reloadOverrides();
 
 		// Dynamic CSS injection is this plugin's core feature — styles.css cannot serve this purpose.
 		// eslint-disable-next-line obsidianmd/no-forbidden-elements, obsidianmd/prefer-active-doc
@@ -27,16 +38,17 @@ export default class RainbowHeaderColoringPlugin extends Plugin {
 		// Register CM6 ViewPlugin for per-occurrence color cycling in editor
 		this.registerEditorExtension(cycleViewPlugin);
 
-		// Update reading view cycles when a leaf becomes active (new note opened)
+		// Rebuild styles (and reading view cycles) whenever the active leaf changes
 		this.registerEvent(
 			this.app.workspace.on("active-leaf-change", () => {
-				updateReadingViewCycles(this.app, this.settings);
+				this.rebuildStyles();
 			}),
 		);
 
 		// Post-processor: assign cycle classes to headings after reading view renders
 		this.registerMarkdownPostProcessor((_el: HTMLElement, _ctx: MarkdownPostProcessorContext) => {
-			updateReadingViewCycles(this.app, this.settings);
+			const effective = this.effectiveSettings();
+			updateReadingViewCycles(this.app, effective);
 		});
 	}
 
@@ -44,13 +56,29 @@ export default class RainbowHeaderColoringPlugin extends Plugin {
 		this.styleEl.remove();
 	}
 
+	/** Reload overrides.jsonc from disk and update cached state. */
+	async reloadOverrides(): Promise<void> {
+		this.overridesText = await readOverridesText(this.app);
+		this.overrides = await loadOverrides(this.app);
+	}
+
+	/** Compute effective settings for the currently active file. */
+	effectiveSettings(): HeaderColoringSettings {
+		const activeFile = this.app.workspace.getActiveFile();
+		return resolveEffectiveSettings(
+			activeFile?.path ?? null,
+			this.settings,
+			this.overrides,
+		);
+	}
+
 	rebuildStyles(): void {
-		const { settings } = this;
-		const cycleActive = settings.mode === "colormap" && settings.cycleColors;
-		setCyclePluginState(settings.nshades, cycleActive);
-		injectStyles(this.styleEl, buildStylesheet(settings));
-		updateReadingViewCycles(this.app, settings);
-		void this.saveData(settings);
+		const effective = this.effectiveSettings();
+		const cycleActive = effective.mode === "colormap" && effective.cycleColors;
+		setCyclePluginState(effective.nshades, cycleActive);
+		injectStyles(this.styleEl, buildStylesheet(effective));
+		updateReadingViewCycles(this.app, effective);
+		void this.saveData(this.settings);
 	}
 
 	async loadSettings(): Promise<void> {

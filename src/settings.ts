@@ -1,6 +1,7 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, Setting, Notice } from "obsidian";
 import type RainbowHeaderColoringPlugin from "./main";
 import { COLORMAP_NAMES, COLORMAP_LABELS, type ColormapName } from "./colorEngine";
+import { saveOverridesText } from "./overrideConfig";
 
 export interface UserDefinedHeaderLevel {
 	color: string;
@@ -239,5 +240,52 @@ export class HeaderColoringSettingsTab extends PluginSettingTab {
 					);
 			});
 		}
+
+		// ── Config overrides ──────────────────────────────────────────────────
+		new Setting(containerEl).setName("Config overrides").setHeading();
+
+		new Setting(containerEl)
+			.setName("Override file")
+			.setDesc(
+				`Stored at ${this.app.vault.configDir}/plugins/rainbow-header-coloring/overrides.jsonc. ` +
+				"Supports vault, folder, and file scopes. Edit here or directly on disk. " +
+				"Changes are applied immediately on save.",
+			);
+
+		// Debounce timer for auto-save
+		let saveTimer: ReturnType<typeof window.setTimeout> | null = null;
+
+		const overrideTextArea = new Setting(containerEl)
+			.setName("Overrides (jsonc)")
+			.setDesc("Edit the overrides config. Use // for comments. Saves automatically 1 s after you stop typing.")
+			.addTextArea((ta) => {
+				ta.inputEl.rows = 18;
+				ta.inputEl.addClass("rhc-overrides-textarea");
+				ta.setValue(this.plugin.overridesText);
+				ta.onChange((value) => {
+					if (saveTimer) window.clearTimeout(saveTimer);
+					saveTimer = window.setTimeout(async () => {
+						this.plugin.overrides = await saveOverridesText(this.plugin.app, value);
+						this.plugin.overridesText = value;
+						this.plugin.rebuildStyles();
+					}, 1000);
+				});
+				return ta;
+			});
+
+		new Setting(containerEl)
+			.addButton((btn) =>
+				btn
+					.setButtonText("Reload from disk")
+					.onClick(async () => {
+						await this.plugin.reloadOverrides();
+						this.plugin.rebuildStyles();
+						// Refresh the textarea value
+						overrideTextArea.components.forEach((c) => {
+							if ("setValue" in c) (c as { setValue: (v: string) => void }).setValue(this.plugin.overridesText);
+						});
+						new Notice("Overrides reloaded.");
+					}),
+			);
 	}
 }
