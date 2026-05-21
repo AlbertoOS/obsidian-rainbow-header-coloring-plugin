@@ -3,6 +3,7 @@
 **Status:** Core implementation complete — ready for QA (Phase 7)
 
 Inspired by [vscode-markdown-header-coloring](https://github.com/satokaz/vscode-markdown-header-coloring) by satokaz.
+
 Scaffolded from the [obsidian-sample-plugin](https://github.com/obsidianmd/obsidian-sample-plugin) template.
 
 ---
@@ -171,8 +172,8 @@ interface HeaderColoringSettings {
 
 ## Obsidian Developer Policy Compliance
 
-Reference: https://docs.obsidian.md/Developer+policies  
-Submission requirements: https://docs.obsidian.md/Plugins/Releasing/Submission+requirements+for+plugins  
+Reference: https://docs.obsidian.md/Developer+policies
+Submission requirements: https://docs.obsidian.md/Plugins/Releasing/Submission+requirements+for+plugins
 Plugin guidelines: https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines
 
 | Rule | Status | Notes |

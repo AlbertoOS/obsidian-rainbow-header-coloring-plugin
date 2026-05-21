@@ -31,5 +31,6 @@ export default tseslint.config(
 		"versions.json",
 		"package.json",
 		"main.js",
+		"test-plugin-vault",
 	]),
 );

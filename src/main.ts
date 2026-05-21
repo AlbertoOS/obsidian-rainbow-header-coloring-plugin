@@ -1,10 +1,11 @@
-import { Plugin } from "obsidian";
+import { Plugin, MarkdownPostProcessorContext } from "obsidian";
 import {
 	HeaderColoringSettings,
 	DEFAULT_SETTINGS,
 	HeaderColoringSettingsTab,
 } from "./settings";
 import { buildStylesheet, injectStyles } from "./styleInjector";
+import { cycleViewPlugin, setCyclePluginState, updateReadingViewCycles } from "./cyclePlugin";
 
 export default class RainbowHeaderColoringPlugin extends Plugin {
 	settings!: HeaderColoringSettings;
@@ -22,6 +23,21 @@ export default class RainbowHeaderColoringPlugin extends Plugin {
 
 		this.rebuildStyles();
 		this.addSettingTab(new HeaderColoringSettingsTab(this.app, this));
+
+		// Register CM6 ViewPlugin for per-occurrence color cycling in editor
+		this.registerEditorExtension(cycleViewPlugin);
+
+		// Update reading view cycles when a leaf becomes active (new note opened)
+		this.registerEvent(
+			this.app.workspace.on("active-leaf-change", () => {
+				updateReadingViewCycles(this.app, this.settings);
+			}),
+		);
+
+		// Post-processor: assign cycle classes to headings after reading view renders
+		this.registerMarkdownPostProcessor((_el: HTMLElement, _ctx: MarkdownPostProcessorContext) => {
+			updateReadingViewCycles(this.app, this.settings);
+		});
 	}
 
 	onunload() {
@@ -29,8 +45,12 @@ export default class RainbowHeaderColoringPlugin extends Plugin {
 	}
 
 	rebuildStyles(): void {
-		injectStyles(this.styleEl, buildStylesheet(this.settings));
-		void this.saveData(this.settings);
+		const { settings } = this;
+		const cycleActive = settings.mode === "colormap" && settings.cycleColors;
+		setCyclePluginState(settings.nshades, cycleActive);
+		injectStyles(this.styleEl, buildStylesheet(settings));
+		updateReadingViewCycles(this.app, settings);
+		void this.saveData(settings);
 	}
 
 	async loadSettings(): Promise<void> {

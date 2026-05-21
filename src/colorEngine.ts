@@ -36,9 +36,9 @@ function toRgba(r: number, g: number, b: number, a: number): string {
 
 function colormapColor(name: ColormapName, t: number): [number, number, number] {
 	switch (name) {
-		case "hsv":       return hsvToRgb(t, 1, 1);
-		case "cool":      return hsvToRgb(0.5 + t * 0.33, 1, 1); // cyan → magenta
-		case "warm":      return hsvToRgb(t * 0.17, 1, 1);        // red → yellow
+		case "hsv":       return hsvToRgb(t, 0.75, 1);
+		case "cool":      return hsvToRgb(0.5 + t * 0.33, 0.75, 1); // cyan → magenta
+		case "warm":      return hsvToRgb(t * 0.17, 0.75, 1);        // red → yellow
 		case "greyscale": { const v = 0.9 - t * 0.65; return [v, v, v]; }
 	}
 }

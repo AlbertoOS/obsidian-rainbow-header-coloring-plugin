@@ -16,6 +16,7 @@ export interface HeaderColoringSettings {
 	nshades: number;
 	fontColorOpacity: number;
 	backgroundColorOpacity: number;
+	cycleColors: boolean;
 	enableEditorMode: boolean;
 	enableReadingMode: boolean;
 	userDefined: { [K in `h${1 | 2 | 3 | 4 | 5 | 6}`]: UserDefinedHeaderLevel };
@@ -50,6 +51,7 @@ export const DEFAULT_SETTINGS: HeaderColoringSettings = {
 	nshades: 20,
 	fontColorOpacity: 1.0,
 	backgroundColorOpacity: 0.1,
+	cycleColors: true,
 	enableEditorMode: true,
 	enableReadingMode: true,
 	userDefined: defaultUserDefined(),
@@ -167,6 +169,18 @@ export class HeaderColoringSettingsTab extends PluginSettingTab {
 							this.plugin.settings.backgroundColorOpacity = v;
 							this.plugin.rebuildStyles();
 						}),
+				);
+
+			new Setting(containerEl)
+				.setName("Cycle colors across headings")
+				.setDesc(
+					"When enabled, each heading gets a unique color from the palette regardless of level, cycling sequentially through the document.",
+				)
+				.addToggle((t) =>
+					t.setValue(this.plugin.settings.cycleColors).onChange((v) => {
+						this.plugin.settings.cycleColors = v;
+						this.plugin.rebuildStyles();
+					}),
 				);
 		}
 
