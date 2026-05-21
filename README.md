@@ -1,11 +1,8 @@
-# Obsidian Header Coloring Plugin
+# Obsidian Rainbow Header Coloring Plugin
 
 Color your markdown headers (H1–H6) in Obsidian with customizable colors — in both the editor and reading view.
 
 > **Status:** Work in progress — see [TODO.md](TODO.md) for the development roadmap.
-
-Inspired by [vscode-markdown-header-coloring](https://github.com/satokaz/vscode-markdown-header-coloring) by [satokaz](https://github.com/satokaz).
-Scaffolded from the [obsidian-sample-plugin](https://github.com/obsidianmd/obsidian-sample-plugin) template.
 
 ---
 
@@ -33,7 +30,7 @@ Scaffolded from the [obsidian-sample-plugin](https://github.com/obsidianmd/obsid
    ```
 2. Copy `main.js`, `manifest.json`, and `styles.css` to your vault:
    ```
-   <Vault>/.obsidian/plugins/obsidian-header-coloring/
+   <Vault>/.obsidian/plugins/rainbow-header-coloring/
    ```
 3. Reload Obsidian and enable the plugin in **Settings → Community plugins**.
 
