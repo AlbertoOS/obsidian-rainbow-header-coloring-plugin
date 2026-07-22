@@ -12,7 +12,9 @@ export function setCyclePluginState(nshades: number, enabled: boolean): void {
 	_enabled = enabled;
 }
 
-const HEADER_RE = /^#{1,6}\s/;
+const ATX_HEADER_RE = /^#{1,6}\s/;
+const SETEXT_H1_RE = /^={2,}\s*$/;
+const SETEXT_H2_RE = /^-{2,}\s*$/;
 
 /** Build decorations that assign rhc-cycle-N classes to heading lines. */
 function buildDecorations(view: EditorView): DecorationSet {
@@ -58,8 +60,8 @@ function buildDecorations(view: EditorView): DecorationSet {
 		}
 		if (inFencedBlock) continue;
 
-		// Check for heading
-		if (HEADER_RE.test(text)) {
+		// Check for ATX heading (# through ######)
+		if (ATX_HEADER_RE.test(text)) {
 			const cycleIdx = headingCount % _nshades;
 			headingCount++;
 			builder.add(
@@ -67,6 +69,21 @@ function buildDecorations(view: EditorView): DecorationSet {
 				line.from,
 				Decoration.line({ class: `rhc-cycle-${cycleIdx}` }),
 			);
+			continue;
+		}
+
+		// Check for setext heading: next line is all === (H1) or --- (H2)
+		if (lineNum < doc.lines && text.trim() !== "") {
+			const nextText = doc.line(lineNum + 1).text;
+			if (SETEXT_H1_RE.test(nextText) || SETEXT_H2_RE.test(nextText)) {
+				const cycleIdx = headingCount % _nshades;
+				headingCount++;
+				builder.add(
+					line.from,
+					line.from,
+					Decoration.line({ class: `rhc-cycle-${cycleIdx}` }),
+				);
+			}
 		}
 	}
 
