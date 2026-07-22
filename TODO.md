@@ -1,6 +1,6 @@
 # TODO — Obsidian Rainbow Header Coloring Plugin
 
-**Status:** Core implementation complete — ready for QA (Phase 7)
+**Status:** ✅ Released — v1.0.0 published on GitHub and live at https://community.obsidian.md/plugins/rainbow-header-coloring
 
 Inspired by [vscode-markdown-header-coloring](https://github.com/satokaz/vscode-markdown-header-coloring) by satokaz.
 
@@ -117,19 +117,19 @@ interface HeaderColoringSettings {
   - 9 markdown files covering all edge cases (happy path, code blocks, YAML frontmatter, blockquotes, inline formatting, real-world structure, callouts, consecutive same-level, edge cases)
   - Run `npm run install-test` to build and copy artifacts into the vault
   - Open `test-plugin-vault/` in Obsidian and enable **Rainbow Header Coloring**
-- [ ] **Manual test checklist**:
-  - [ ] Headers H1–H6 are colored in Live Preview
-  - [ ] Headers H1–H6 are colored in Reading mode
-  - [ ] Headers H1–H6 are colored in Source mode
-  - [ ] Headings inside fenced code blocks (` ``` `) are **not** colored
-  - [ ] Headings inside YAML front matter are **not** colored
-  - [ ] Changing settings updates colors immediately (no Obsidian restart needed)
-  - [ ] Disabling the plugin removes all injected styles
-  - [ ] Re-enabling restores styles correctly
-  - [ ] Works in light theme and dark theme
-  - [ ] User-defined mode: per-level colors apply correctly
-  - [ ] Colormap mode: colors cycle correctly across multiple headings
-- [ ] **Beta testing via BRAT** (optional, before public submission):
+- [x] **Manual test checklist**:
+  - [x] Headers H1–H6 are colored in Live Preview
+  - [x] Headers H1–H6 are colored in Reading mode
+  - [x] Headers H1–H6 are colored in Source mode
+  - [x] Headings inside fenced code blocks (` ``` `) are **not** colored
+  - [x] Headings inside YAML front matter are **not** colored
+  - [x] Changing settings updates colors immediately (no Obsidian restart needed)
+  - [x] Disabling the plugin removes all injected styles
+  - [x] Re-enabling restores styles correctly
+  - [x] Works in light theme and dark theme
+  - [x] User-defined mode: per-level colors apply correctly
+  - [x] Colormap mode: colors cycle correctly across multiple headings
+- [x] **Beta testing via BRAT** (optional, before public submission):
   - Testers install the [BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin
   - They add your GitHub repo URL in BRAT → **Add Beta Plugin**
   - No public release required — useful for community feedback before submission
@@ -138,17 +138,17 @@ interface HeaderColoringSettings {
 
 ## Phase 8 · Release Prep
 
-- [ ] **GitHub repo settings**: go to **Settings → Actions → General → Workflow permissions**, select **Read and write permissions**, save. Required for the release workflow to create GitHub releases.
-- [ ] Final README with at least one screenshot or description of visual result
-- [ ] Ensure `manifest.json` passes all submission requirements:
+- [x] **GitHub repo settings**: go to **Settings → Actions → General → Workflow permissions**, select **Read and write permissions**, save. Required for the release workflow to create GitHub releases.
+- [x] Final README with at least one screenshot or description of visual result
+- [x] Ensure `manifest.json` passes all submission requirements:
   - `id` does not contain "obsidian" — currently `"rainbow-header-coloring"` ✅
   - `description` ≤250 chars, ends with period, no emoji/special chars, sentence case ✅
   - `fundingUrl` absent (not accepting donations) ✅
   - `isDesktopOnly: false` (no Node/Electron APIs used) ✅
   - `minAppVersion` set appropriately ✅
-- [ ] Bump version: `npm run version` (updates `manifest.json` and `versions.json`)
-- [ ] Production build: `npm run build`
-- [ ] **Create GitHub release** (via GitHub Actions — automated):
+- [x] Bump version: `npm run version` (updates `manifest.json` and `versions.json`)
+- [x] Production build: `npm run build`
+- [x] **Create GitHub release** (via GitHub Actions — automated):
   - Create an annotated tag matching the version in `manifest.json`:
     ```bash
     git tag -a 1.0.0 -m "1.0.0"
@@ -157,7 +157,7 @@ interface HeaderColoringSettings {
   - The `.github/workflows/release.yml` workflow triggers automatically
   - It builds the plugin and creates a **draft** GitHub release with `main.js`, `manifest.json`, `styles.css` attached
   - Go to **Releases** on GitHub, edit the draft, add release notes, and **Publish**
-- [ ] **Submit to Obsidian community directory**:
+- [x] **Submit to Obsidian community directory**:
   1. Go to [community.obsidian.md](https://community.obsidian.md) and sign in with your Obsidian account
   2. Link your GitHub account to your profile
   3. Select **Plugins → New plugin**
