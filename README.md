@@ -17,7 +17,9 @@ Color your markdown headers (H1–H6) in Obsidian with customizable colors — i
 
 ### Community plugin directory
 
-> Not yet published. Coming soon.
+1. Open Obsidian and go to **Settings → Community plugins**.
+2. Select **Browse** and search for **Rainbow Header Coloring**.
+3. Select **Install**, then **Enable**.
 
 ### Manual install (development / testing)
 
