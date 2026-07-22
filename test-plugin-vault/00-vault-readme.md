@@ -39,3 +39,11 @@ Then open this folder as a vault in Obsidian, go to **Settings → Community plu
 - [ ] **Enable/disable editor/reading mode**: scope toggles work correctly
 - [ ] **Opacity sliders**: background at 0.1 is subtle; font at 1.0 is vivid
 - [ ] **Plugin reload**: styles survive disable → enable cycle without leaking DOM elements
+
+## Known behavior (by design)
+
+| Case | Behavior | Notes |
+|------|----------|-------|
+| Headings inside callout blocks | **Not colored** | Callout CSS overrides plugin styles — acceptable, keeps callout visual identity clean |
+| Setext-style headings (`===` / `---`) | **Not colored** — needs DevTools investigation | May be a selector specificity issue in reading view |
+| Tab after `##` instead of space | Not colored | Invalid CommonMark — tab-separated headings are not standard markdown |

@@ -87,7 +87,7 @@ npm run install-test
 
 A `test-plugin-vault/` directory is included in the repo with 9 markdown files covering all edge cases (code blocks, YAML frontmatter, blockquotes, callouts, inline formatting, etc.). After running `npm run install-test`, open that folder as an Obsidian vault to do manual QA.
 
-See [TODO.md](TODO.md) for the full development roadmap.
+See [CHANGELOG](https://github.com/AlbertoOS/obsidian-rainbow-header-coloring-plugin/releases) for release history.
 
 ---
 
