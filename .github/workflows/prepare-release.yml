@@ -1,0 +1,59 @@
+name: Prepare release
+
+# Trigger manually from the Actions tab.
+# Runs on dev, bumps version, updates CHANGELOG, opens PR to main.
+on:
+  workflow_dispatch:
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+          # Must use a PAT so the commit and PR trigger downstream CI
+          token: ${{ secrets.RELEASE_BOT_TOKEN }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run prepare-release script
+        run: node scripts/release.mjs
+
+      - name: Push release commit to dev
+        run: git push origin dev
+
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./manifest.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Open PR to main
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          # Extract the latest CHANGELOG section as PR body
+          NOTES=$(awk '/^## \[/{if(p)exit; p=1; next} p' CHANGELOG.md | head -n -1)
+          gh pr create \
+            --base main \
+            --head dev \
+            --title "chore(release): v${VERSION}" \
+            --body "${NOTES:-Release v${VERSION}.}"
