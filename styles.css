@@ -1,7 +1,7 @@
 /* Rainbow Header Coloring plugin styles */
 
 .rhc-overrides-textarea {
-	width: 100%;
-	font-family: var(--font-monospace);
-	font-size: var(--font-smaller);
+  width: 100%;
+  font-family: var(--font-monospace);
+  font-size: var(--font-smaller);
 }

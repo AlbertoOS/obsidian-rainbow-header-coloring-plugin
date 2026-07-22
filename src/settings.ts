@@ -164,11 +164,11 @@ export class HeaderColoringSettingsTab extends PluginSettingTab {
     ];
   }
 
-	/**
-	 * Imperative fallback for Obsidian < 1.13.0.
-	 * On 1.13.0+, getSettingDefinitions() takes over and this method is not called.
-	 */
-	display(): void {
+  /**
+   * Imperative fallback for Obsidian < 1.13.0.
+   * On 1.13.0+, getSettingDefinitions() takes over and this method is not called.
+   */
+  display(): void {
     const { containerEl } = this;
     containerEl.empty();
 

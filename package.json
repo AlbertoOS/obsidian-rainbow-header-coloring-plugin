@@ -9,7 +9,8 @@
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "version": "node version-bump.mjs && git add manifest.json versions.json",
     "lint": "eslint .",
-    "install-test": "bash scripts/install-to-test-vault.sh"
+    "install-test": "bash scripts/install-to-test-vault.sh",
+    "prepare-release": "node scripts/release.mjs"
   },
   "keywords": [],
   "license": "GPL-3.0-only",
@@ -18,10 +19,13 @@
     "@codemirror/view": "^6.38.6",
     "@eslint/js": "9.30.1",
     "@types/node": "^25.9.1",
+    "conventional-changelog-cli": "^5.0.0",
+    "conventional-recommended-bump": "^12.1.0",
     "esbuild": "^0.28.1",
     "eslint-plugin-obsidianmd": "0.3.0",
     "globals": "17.6.0",
     "jiti": "2.7.0",
+    "semver": "^7.8.5",
     "tslib": "2.8.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "8.59.4"
