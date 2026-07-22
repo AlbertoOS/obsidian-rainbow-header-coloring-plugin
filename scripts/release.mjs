@@ -2,7 +2,8 @@
 /**
  * Release preparation script.
  *
- * Run with: npm run prepare-release
+ * Intended for use via CI (Actions → "Prepare release" → Run workflow).
+ * Run locally with `npm run prepare-release` only when GitHub Actions are unavailable.
  *
  * What it does:
  *   1. Determines the next version via conventional-recommended-bump
