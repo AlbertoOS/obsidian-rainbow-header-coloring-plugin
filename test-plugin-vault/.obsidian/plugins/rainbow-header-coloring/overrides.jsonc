@@ -1,0 +1,30 @@
+{
+  // Override plugin settings per vault, folder, or file.
+  // Any key from the plugin settings can be specified in each block.
+  // Priority: file > folder (most specific) > vault > plugin UI settings.
+  //
+  // Available keys:
+  //   mode: "colormap" | "userDefined"
+  //   colormapName: "hsv" | "cool" | "warm" | "greyscale"
+  //   nshades: 10–40
+  //   fontColorOpacity: 0.0–1.0
+  //   backgroundColorOpacity: 0.0–1.0
+  //   cycleColors: true | false
+  //   enableEditorMode: true | false
+  //   enableReadingMode: true | false
+  //   userDefined: { h1: { color, backgroundColor, enableBackground, bold, italic }, ... }
+
+  // Vault-wide overrides (applies to all files unless overridden below):
+  "vault": {},
+
+  // Folder overrides (relative path from vault root, no leading slash):
+  "folders": {
+    // "Work": { "colormapName": "warm" },
+    // "Personal/Journal": { "cycleColors": false }
+  },
+
+  // File overrides (relative path including .md extension):
+  "files": {
+    // "Daily Notes/2024-01-01.md": { "mode": "userDefined" }
+  }
+}

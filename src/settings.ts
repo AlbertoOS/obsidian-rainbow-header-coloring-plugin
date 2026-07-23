@@ -164,11 +164,11 @@ export class HeaderColoringSettingsTab extends PluginSettingTab {
     ];
   }
 
-	/**
-	 * Imperative fallback for Obsidian < 1.13.0.
-	 * On 1.13.0+, getSettingDefinitions() takes over and this method is not called.
-	 */
-	display(): void {
+  /**
+   * Imperative fallback for Obsidian < 1.13.0.
+   * On 1.13.0+, getSettingDefinitions() takes over and this method is not called.
+   */
+  display(): void {
     const { containerEl } = this;
     containerEl.empty();
 
@@ -184,8 +184,7 @@ export class HeaderColoringSettingsTab extends PluginSettingTab {
           .onChange((value) => {
             this.plugin.settings.mode = value as "colormap" | "userDefined";
             this.plugin.rebuildStyles();
-            // eslint-disable-next-line @typescript-eslint/no-deprecated -- intentional: display() is kept for Obsidian < 1.13 compat
-            this.display();
+            this.update();
           })
       );
 

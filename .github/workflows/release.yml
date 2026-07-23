@@ -1,35 +1,95 @@
 name: Release Obsidian plugin
 
 on:
-  push:
-    tags:
-      - "*"
+  pull_request:
+    branches: [main]
+    types: [closed]
 
 jobs:
-  build:
+  release:
+    # Only run when a chore(release): PR is merged
+    if: >
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.title, 'chore(release):')
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Use bot token so the back-merge PR triggers CI on protected dev
+          token: ${{ secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22.x"
 
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./manifest.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Build plugin
-        run: |
-          npm install
-          npm run build
+        run: npm ci && npm run build
 
-      - name: Create release
+      - name: Tag release
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "${{ steps.version.outputs.version }}"
+          git push origin "${{ steps.version.outputs.version }}"
+
+      - name: Create GitHub release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tag="${GITHUB_REF#refs/tags/}"
-
-          gh release create "$tag" \
-            --title="$tag" \
-            --draft \
+          VERSION="${{ steps.version.outputs.version }}"
+          # Extract the latest CHANGELOG section as release notes
+          NOTES=$(awk '/^## \[/{if(p)exit; p=1; next} p' CHANGELOG.md | sed '/^## \[/q' | head -n -1)
+          gh release create "$VERSION" \
+            --title "v${VERSION}" \
+            --notes "${NOTES:-See CHANGELOG.md for details.}" \
             main.js manifest.json styles.css
+
+      - name: Back-merge main → dev
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git fetch origin dev:dev
+
+          # Skip if dev already contains this commit
+          MAIN_SHA=$(git rev-parse main)
+          if git merge-base --is-ancestor "$MAIN_SHA" dev; then
+            echo "dev already contains main — skipping back-merge"
+            exit 0
+          fi
+
+          # Force-update a stable sync branch from main, open/update PR
+          git push -f origin "main:refs/heads/chore/sync-main-to-dev"
+
+          PR=$(gh pr list \
+            --head chore/sync-main-to-dev \
+            --base dev \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')
+
+          if [ -z "$PR" ]; then
+            gh pr create \
+              --base dev \
+              --head chore/sync-main-to-dev \
+              --title "chore(sync): back-merge v${VERSION} to dev" \
+              --body "Automated back-merge of release v${VERSION} from main into dev."
+          else
+            echo "Sync PR #$PR already open — skipping creation"
+          fi
+
+          # Auto-merge if the token has sufficient rights
+          gh pr merge chore/sync-main-to-dev --auto --merge 2>/dev/null || \
+            echo "Auto-merge not available — please merge the sync PR manually."
