@@ -17,7 +17,7 @@ export default class RainbowHeaderColoringPlugin extends Plugin {
 
     // Dynamic CSS injection is this plugin's core feature — the stylesheet content
     // is rebuilt from settings at runtime and cannot be a static styles.css file.
-    this.styleEl = activeDocument.createElement("style");
+    this.styleEl = createEl("style");
     this.styleEl.id = "rainbow-header-coloring";
     activeDocument.head.appendChild(this.styleEl);
 
