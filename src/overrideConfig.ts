@@ -98,10 +98,13 @@ export async function saveOverridesText(app: App, text: string): Promise<Overrid
 
 /** Deep-merge a partial override into base settings. */
 function mergeSettings(base: HeaderColoringSettings, override: PartialHeaderSettings): HeaderColoringSettings {
-  // Spread top-level fields, exclude userDefined (handled separately below)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { userDefined, ...overrideRest } = override;
-  const merged: HeaderColoringSettings = { ...base, ...overrideRest };
+  // Spread top-level scalar fields from override into base, then handle userDefined separately below
+  const merged: HeaderColoringSettings = { ...base };
+  for (const key of Object.keys(override) as (keyof PartialHeaderSettings)[]) {
+    if (key !== "userDefined") {
+      (merged as unknown as Record<string, unknown>)[key] = override[key];
+    }
+  }
   if (override.userDefined) {
     merged.userDefined = Object.fromEntries(
       (["h1", "h2", "h3", "h4", "h5", "h6"] as const).map((k) => [k, { ...base.userDefined[k], ...(override.userDefined?.[k] ?? {}) }])
