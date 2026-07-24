@@ -44,10 +44,11 @@ function run(cmd, opts = {}) {
 
 let bumpOutput;
 try {
-  bumpOutput = run("npx --no conventional-recommended-bump -p conventionalcommits", { pipe: true });
+  bumpOutput = run("./node_modules/.bin/conventional-recommended-bump -p conventionalcommits", { pipe: true });
 } catch {
-  console.error("conventional-recommended-bump failed. Ensure you have conventional commits since the last tag.");
-  process.exit(1);
+  // No releasable commits (feat/fix/BREAKING CHANGE) — fall back to patch for chore/refactor/docs bumps
+  console.log("No releasable conventional commits found — defaulting to patch bump.");
+  bumpOutput = JSON.stringify({ releaseType: "patch" });
 }
 
 // Output is a JSON object like {"releaseType":"patch","reason":"...","level":2}
