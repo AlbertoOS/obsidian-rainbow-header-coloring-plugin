@@ -22,7 +22,7 @@
     "conventional-changelog-cli": "^5.0.0",
     "conventional-recommended-bump": "^12.1.0",
     "esbuild": "^0.28.1",
-    "eslint-plugin-obsidianmd": "0.3.0",
+    "eslint-plugin-obsidianmd": "^0.4.1",
     "globals": "^17.7.0",
     "jiti": "2.7.0",
     "semver": "^7.8.5",

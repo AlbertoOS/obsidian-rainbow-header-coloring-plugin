@@ -160,4 +160,3 @@ export class HeaderColoringSettingsTab extends PluginSettingTab {
     ];
   }
 }
-
