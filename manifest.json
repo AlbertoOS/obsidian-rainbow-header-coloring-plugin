@@ -1,7 +1,7 @@
 {
 	"id": "rainbow-header-coloring",
 	"name": "Rainbow Header Coloring",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"minAppVersion": "1.13.0",
 	"description": "Color markdown headers (H1-H6) with customizable palettes. Supports colormap cycling and per-level user-defined colors.",
 	"author": "Alberto Oliveira",
