@@ -105,7 +105,7 @@ writeJson("versions.json", versions);
 // ---------------------------------------------------------------------------
 
 console.log("Updating CHANGELOG.md…");
-run("npx --no conventional-changelog-cli -p conventionalcommits -i CHANGELOG.md -s");
+run("./node_modules/.bin/conventional-changelog -p conventionalcommits -i CHANGELOG.md -s");
 
 // ---------------------------------------------------------------------------
 // 5. Commit
