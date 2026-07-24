@@ -13,9 +13,12 @@ jobs:
       startsWith(github.event.pull_request.title, 'chore(release):')
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
-        id-token: write
+  contents: write
+  pull-requests: write
+  id-token: write
+  attestations: write
+
+attestations: write
         attestations: write
 
     steps:
@@ -47,7 +50,7 @@ jobs:
           git push origin "${{ steps.version.outputs.version }}"
 
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             main.js
