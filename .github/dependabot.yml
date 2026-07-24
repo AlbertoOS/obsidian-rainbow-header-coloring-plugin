@@ -9,3 +9,7 @@ updates:
       prefix: "chore(deps)"
     labels:
       - "dependencies"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
