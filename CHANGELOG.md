@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/AlbertoOS/obsidian-rainbow-header-coloring-plugin/compare/1.2.0...1.2.2) (2026-07-24)
+
+### Bug Fixes
+
+* default to patch bump when no releasable commits found ([5bcab1b](https://github.com/AlbertoOS/obsidian-rainbow-header-coloring-plugin/commit/5bcab1b3fa47453e5476f814d26b86de18dfb145))
+* release workflow attestation permission and action version ([#17](https://github.com/AlbertoOS/obsidian-rainbow-header-coloring-plugin/issues/17)) ([f9d08da](https://github.com/AlbertoOS/obsidian-rainbow-header-coloring-plugin/commit/f9d08dab7458e81e4d09e683ac7948bcf521caed))
+* use local node_modules for conventional-changelog in release script ([7b31cc0](https://github.com/AlbertoOS/obsidian-rainbow-header-coloring-plugin/commit/7b31cc00d6d92db9f53ea3a86c3e17cd26d58c38))
 ## [1.2.0](https://github.com/AlbertoOS/obsidian-rainbow-header-coloring-plugin/compare/1.0.0...1.2.0) (2026-07-24)
 
 ### Features
