@@ -44,7 +44,7 @@ function run(cmd, opts = {}) {
 
 let bumpOutput;
 try {
-  bumpOutput = run("npx --no conventional-recommended-bump -p conventionalcommits", { pipe: true });
+  bumpOutput = run("./node_modules/.bin/conventional-recommended-bump -p conventionalcommits", { pipe: true });
 } catch {
   console.error("conventional-recommended-bump failed. Ensure you have conventional commits since the last tag.");
   process.exit(1);
@@ -104,7 +104,7 @@ writeJson("versions.json", versions);
 // ---------------------------------------------------------------------------
 
 console.log("Updating CHANGELOG.md…");
-run("npx --no conventional-changelog-cli -p conventionalcommits -i CHANGELOG.md -s");
+run("./node_modules/.bin/conventional-changelog -p conventionalcommits -i CHANGELOG.md -s");
 
 // ---------------------------------------------------------------------------
 // 5. Commit

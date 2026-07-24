@@ -1,0 +1,35 @@
+#!/bin/sh
+# Auto-sync with origin/dev before committing.
+# - If behind and fast-forwardable: auto-pull silently with a message
+# - If diverged: warn and block the commit
+# - If up to date: proceed silently
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Only applies on dev branch
+if [ "$BRANCH" != "dev" ]; then
+  exit 0
+fi
+
+git fetch origin dev --quiet 2>/dev/null
+
+LOCAL=$(git rev-parse HEAD)
+REMOTE=$(git rev-parse origin/dev 2>/dev/null || echo "")
+
+if [ -z "$REMOTE" ] || [ "$LOCAL" = "$REMOTE" ]; then
+  exit 0
+fi
+
+BEHIND=$(git rev-list --count HEAD..origin/dev)
+AHEAD=$(git rev-list --count origin/dev..HEAD)
+
+if [ "$BEHIND" -gt 0 ] && [ "$AHEAD" -eq 0 ]; then
+  echo "→ Pulling $BEHIND commit(s) from origin/dev..."
+  git pull --ff-only origin dev --quiet
+  echo "✓ Updated from origin/dev"
+elif [ "$BEHIND" -gt 0 ] && [ "$AHEAD" -gt 0 ]; then
+  echo "⚠ dev has diverged from origin/dev ($AHEAD ahead, $BEHIND behind)"
+  echo "  Resolve with: git pull --rebase origin dev"
+  echo "  Commit blocked."
+  exit 1
+fi
