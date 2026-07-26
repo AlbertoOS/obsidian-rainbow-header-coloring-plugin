@@ -182,7 +182,7 @@ Plugin guidelines: https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines
 | No dynamic ads | ✅ | No network requests at all |
 | No client-side telemetry | ✅ | Fully offline |
 | No self-update mechanism | ✅ | Obsidian handles updates |
-| LICENSE file present | ✅ | GPL-3.0-only |
+| LICENSE file present | ✅ | MIT |
 | Attribution in README | ✅ | obsidian-sample-plugin + vscode-markdown-header-coloring credited |
 | Trademark compliance | ✅ | "Obsidian" in name is acceptable for community plugins |
 | No network use | ✅ | Nothing to disclose |

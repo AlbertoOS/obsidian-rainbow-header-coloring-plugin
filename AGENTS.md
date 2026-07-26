@@ -110,7 +110,7 @@ This plugin targets the [Obsidian community directory](https://community.obsidia
 - ✅ Fully offline — no network requests
 - ✅ No telemetry
 - ✅ No ads
-- ✅ Open source (GPL-3.0-only) with LICENSE file
+- ✅ Open source (MIT) with LICENSE file
 - ✅ No auto-update logic
 
 **Trademark:** The word "Obsidian" in the plugin name is acceptable for community plugins (it aids discoverability) as long as it's clear this is a community plugin, not a first-party Obsidian creation. Do not use the Obsidian logo or imply official affiliation.
