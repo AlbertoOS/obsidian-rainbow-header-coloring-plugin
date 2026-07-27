@@ -100,4 +100,4 @@ See [CHANGELOG](https://github.com/AlbertoOS/obsidian-rainbow-header-coloring-pl
 
 ## License
 
-[GPL-3.0-only](LICENSE)
+[MIT](LICENSE)

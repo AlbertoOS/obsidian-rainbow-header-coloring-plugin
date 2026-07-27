@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-header-coloring",
-	"version": "1.2.2",
+	"version": "1.2.3",
 	"description": "Color your markdown headers (H1–H6) in Obsidian with customizable palettes",
 	"main": "main.js",
 	"type": "module",
@@ -13,7 +13,7 @@
 		"prepare-release": "node scripts/release.mjs"
 	},
 	"keywords": [],
-	"license": "GPL-3.0-only",
+	"license": "MIT",
 	"devDependencies": {
 		"@codemirror/state": "^6.5.0",
 		"@codemirror/view": "^6.38.6",
@@ -22,7 +22,7 @@
 		"conventional-changelog-cli": "^5.0.0",
 		"conventional-recommended-bump": "^12.1.0",
 		"esbuild": "^0.28.1",
-		"eslint-plugin-obsidianmd": "0.3.0",
+		"eslint-plugin-obsidianmd": "^0.4.1",
 		"globals": "^17.7.0",
 		"jiti": "2.7.0",
 		"semver": "^7.8.5",

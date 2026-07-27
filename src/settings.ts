@@ -1,6 +1,7 @@
-import { App, PluginSettingTab } from "obsidian";
+import { App, PluginSettingTab, Setting, Notice } from "obsidian";
 import type RainbowHeaderColoringPlugin from "./main";
 import { COLORMAP_NAMES, COLORMAP_LABELS, type ColormapName } from "./colorEngine";
+import { saveOverridesText, readOverridesText } from "./overrideConfig";
 
 export interface UserDefinedHeaderLevel {
   color: string;
@@ -59,6 +60,7 @@ export const DEFAULT_SETTINGS: HeaderColoringSettings = {
 
 export class HeaderColoringSettingsTab extends PluginSettingTab {
   plugin: RainbowHeaderColoringPlugin;
+  private debounceTimer: number | null = null;
 
   constructor(app: App, plugin: RainbowHeaderColoringPlugin) {
     super(app, plugin);
@@ -67,7 +69,7 @@ export class HeaderColoringSettingsTab extends PluginSettingTab {
 
   /**
    * Declarative settings definitions for Obsidian 1.13+ settings search.
-   * Replaces the imperative display() method (minAppVersion >= 1.13.0).
+   * On 1.13.0+, this takes precedence and display() is never called.
    */
   getSettingDefinitions() {
     const s = this.plugin.settings;
@@ -159,5 +161,229 @@ export class HeaderColoringSettingsTab extends PluginSettingTab {
         : []),
     ];
   }
-}
 
+  /** Re-render the imperative settings UI (for mode/toggle changes that affect visible controls). */
+  private refresh(): void {
+    // Call via bracket notation to avoid the @deprecated lint rule on display().
+    // display() is intentionally kept as the < 1.13.0 imperative fallback (Path B).
+    (this as unknown as Record<string, () => void>)["display"]?.();
+  }
+
+  /**
+   * Imperative fallback for Obsidian < 1.13.0.
+   * On 1.13.0+, getSettingDefinitions() takes precedence and this is never called.
+   */
+  display(): void {
+    const { containerEl } = this;
+    containerEl.empty();
+
+    const s = this.plugin.settings;
+    const rebuild = () => this.plugin.rebuildStyles();
+
+    // ── Mode ──────────────────────────────────────────────────────────
+    new Setting(containerEl)
+      .setName("Coloring mode")
+      .setDesc("Colormap cycles through a built-in palette; user defined lets you set a color per heading level.")
+      .addDropdown((dd) => {
+        dd.addOption("colormap", "Colormap");
+        dd.addOption("userDefined", "User defined");
+        dd.setValue(s.mode);
+        dd.onChange((val) => {
+          this.plugin.settings.mode = val as "colormap" | "userDefined";
+          rebuild();
+          this.refresh();
+        });
+      });
+
+    // ── Scope ─────────────────────────────────────────────────────────
+    new Setting(containerEl).setName("Scope").setHeading();
+
+    new Setting(containerEl)
+      .setName("Enable in editor")
+      .setDesc("Apply colors in the editor (live preview and source mode).")
+      .addToggle((t) => {
+        t.setValue(s.enableEditorMode);
+        t.onChange((val) => {
+          this.plugin.settings.enableEditorMode = val;
+          rebuild();
+        });
+      });
+
+    new Setting(containerEl)
+      .setName("Enable in reading view")
+      .setDesc("Apply colors when reading notes.")
+      .addToggle((t) => {
+        t.setValue(s.enableReadingMode);
+        t.onChange((val) => {
+          this.plugin.settings.enableReadingMode = val;
+          rebuild();
+        });
+      });
+
+    // ── Colormap ──────────────────────────────────────────────────────
+    if (s.mode === "colormap") {
+      new Setting(containerEl).setName("Colormap").setHeading();
+
+      const colormapOptions: Record<string, string> = {};
+      for (const name of COLORMAP_NAMES) {
+        colormapOptions[name] = COLORMAP_LABELS[name];
+      }
+
+      new Setting(containerEl)
+        .setName("Palette")
+        .setDesc("Color palette used to color heading levels.")
+        .addDropdown((dd) => {
+          for (const [val, label] of Object.entries(colormapOptions)) {
+            dd.addOption(val, label);
+          }
+          dd.setValue(s.colormapName);
+          dd.onChange((val) => {
+            this.plugin.settings.colormapName = val as ColormapName;
+            rebuild();
+          });
+        });
+
+      new Setting(containerEl)
+        .setName("Number of shades")
+        .setDesc("How many color steps in the palette (10–40).")
+        .addSlider((sl) => {
+          sl.setLimits(10, 40, 1);
+          sl.setValue(s.nshades);
+          sl.onChange((val) => {
+            this.plugin.settings.nshades = val;
+            rebuild();
+          });
+        });
+
+      new Setting(containerEl)
+        .setName("Font color opacity")
+        .setDesc("Opacity of header text color (0 = transparent, 1 = solid).")
+        .addSlider((sl) => {
+          sl.setLimits(0, 1, 0.05);
+          sl.setValue(s.fontColorOpacity);
+          sl.onChange((val) => {
+            this.plugin.settings.fontColorOpacity = val;
+            rebuild();
+          });
+        });
+
+      new Setting(containerEl)
+        .setName("Background color opacity")
+        .setDesc("Opacity of header background color (0 = transparent, 1 = solid).")
+        .addSlider((sl) => {
+          sl.setLimits(0, 1, 0.05);
+          sl.setValue(s.backgroundColorOpacity);
+          sl.onChange((val) => {
+            this.plugin.settings.backgroundColorOpacity = val;
+            rebuild();
+          });
+        });
+
+      new Setting(containerEl)
+        .setName("Cycle colors across headings")
+        .setDesc("When enabled, each heading gets a unique color from the palette regardless of level, cycling sequentially through the document.")
+        .addToggle((t) => {
+          t.setValue(s.cycleColors);
+          t.onChange((val) => {
+            this.plugin.settings.cycleColors = val;
+            rebuild();
+          });
+        });
+    }
+
+    // ── User defined ──────────────────────────────────────────────────
+    if (s.mode === "userDefined") {
+      new Setting(containerEl).setName("User defined").setHeading();
+
+      const levels = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
+      for (const level of levels) {
+        const label = level.toUpperCase();
+        new Setting(containerEl).setName(label).setHeading();
+
+        new Setting(containerEl)
+          .setName("Color")
+          .addColorPicker((cp) => {
+            cp.setValue(s.userDefined[level].color);
+            cp.onChange((val) => {
+              this.plugin.settings.userDefined[level].color = val;
+              rebuild();
+            });
+          });
+
+        new Setting(containerEl)
+          .setName("Bold")
+          .addToggle((t) => {
+            t.setValue(s.userDefined[level].bold);
+            t.onChange((val) => {
+              this.plugin.settings.userDefined[level].bold = val;
+              rebuild();
+            });
+          });
+
+        new Setting(containerEl)
+          .setName("Italic")
+          .addToggle((t) => {
+            t.setValue(s.userDefined[level].italic);
+            t.onChange((val) => {
+              this.plugin.settings.userDefined[level].italic = val;
+              rebuild();
+            });
+          });
+
+        new Setting(containerEl)
+          .setName("Enable background color")
+          .addToggle((t) => {
+            t.setValue(s.userDefined[level].enableBackground);
+            t.onChange((val) => {
+              this.plugin.settings.userDefined[level].enableBackground = val;
+              rebuild();
+              this.refresh();
+            });
+          });
+
+        if (s.userDefined[level].enableBackground) {
+          new Setting(containerEl)
+            .setName("Background color")
+            .addColorPicker((cp) => {
+              cp.setValue(s.userDefined[level].backgroundColor);
+              cp.onChange((val) => {
+                this.plugin.settings.userDefined[level].backgroundColor = val;
+                rebuild();
+              });
+            });
+        }
+      }
+    }
+
+    // ── Config overrides ──────────────────────────────────────────────
+    new Setting(containerEl).setName("Config overrides").setHeading();
+
+    const overrideSetting = new Setting(containerEl)
+      .setName("Overrides (jsonc)")
+      .setDesc("Per-vault, per-folder, or per-file settings overrides in jsonc format.");
+
+    const textarea = overrideSetting.controlEl.createEl("textarea", { cls: "rhc-overrides-textarea" });
+
+    readOverridesText(this.app).then((text) => {
+      textarea.value = text;
+    }).catch(() => {
+      new Notice("Rainbow header coloring: could not read overrides file.");
+    });
+
+    textarea.addEventListener("input", () => {
+      if (this.debounceTimer !== null) window.clearTimeout(this.debounceTimer);
+      this.debounceTimer = window.setTimeout(() => {
+        void saveOverridesText(this.app, textarea.value).then(() => {
+          void this.plugin.reloadOverrides().then(() => {
+            this.plugin.rebuildStyles();
+          });
+        });
+      }, 1000);
+    });
+
+    new Setting(containerEl)
+      .addButton((b) => {
+        b.setButtonText("Reload from disk").onClick(() => { this.refresh(); });
+      });
+  }
+}
